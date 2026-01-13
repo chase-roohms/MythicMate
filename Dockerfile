@@ -31,7 +31,8 @@ COPY --from=builder /app/target/MythicMate-1.0-SNAPSHOT.jar /app/mythicmate.jar
 # Create a non-root user for security
 RUN addgroup -g 1000 mythicmate && \
     adduser -D -u 1000 -G mythicmate mythicmate && \
-    chown -R mythicmate:mythicmate /app
+    chown -R mythicmate:mythicmate /app && \
+    chmod -R 755 /app/database
 
 # Switch to non-root user
 USER mythicmate
