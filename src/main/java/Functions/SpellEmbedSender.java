@@ -1,11 +1,9 @@
 package Functions;
 
-import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.entities.channel.unions.MessageChannelUnion;
-import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
-
-import java.awt.*;
+import java.awt.Color;
 import java.util.Scanner;
+
+import net.dv8tion.jda.api.EmbedBuilder;
 
 public class SpellEmbedSender {
     public static EmbedBuilder getSpellEmbed (Scanner fileDetails){
