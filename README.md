@@ -2,6 +2,8 @@
 
 A powerful D&D Discord bot designed for seamless remote gameplay. MythicMate provides intuitive dice rolling, comprehensive rules referencing, and AI-powered assistance—all optimized for speed and ease of use.
 
+<img src="images/mythicmate-header.webp" alt="MythicMate Header" width="100%">
+
 ## Features
 
 ### Flexible Dice Rolling
