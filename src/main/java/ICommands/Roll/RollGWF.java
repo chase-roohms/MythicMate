@@ -1,18 +1,17 @@
 package ICommands.Roll;
 
-import ICommandsHelpers.RollCommand;
+import java.util.ArrayList;
+import java.util.List;
+
 import Events.ICommand;
+import ICommandsHelpers.RollCommand;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 
-import java.util.ArrayList;
-import java.util.List;
-
 public class RollGWF implements ICommand {
     private final String name = "rollgwf";
     private final String description = "Roll some dice, reroll 1's and 2's!";
-
 
     @Override
     public String getName() {
