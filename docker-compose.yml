@@ -1,8 +1,8 @@
 services:
   mythicmate:
+    image: neonvariant/mythicmate:main
     container_name: mythicmate-bot
     restart: unless-stopped
-    user: "${USER_ID:-1000}:${GROUP_ID:-1000}"
     
     # Environment variables for the Authenticate class
     environment:

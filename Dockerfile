@@ -1,10 +1,6 @@
 # Use Eclipse Temurin JDK 21 (recommended for production)
 FROM eclipse-temurin:21-jdk-alpine AS builder
 
-# Accept build arguments for user/group IDs
-ARG USER_ID=1000
-ARG GROUP_ID=1000
-
 # Set working directory
 WORKDIR /app
 
@@ -23,12 +19,11 @@ RUN mvn clean package -DskipTests
 # Runtime stage - use smaller JRE image
 FROM eclipse-temurin:21-jre-alpine
 
-# Accept build arguments for user/group IDs
-ARG USER_ID=1000
-ARG GROUP_ID=1000
-
 # Set working directory
 WORKDIR /app
+
+# Install su-exec for dropping privileges
+RUN apk add --no-cache su-exec
 
 # Create database directory for persistent data
 RUN mkdir -p /app/database
@@ -36,14 +31,14 @@ RUN mkdir -p /app/database
 # Copy the built JAR from builder stage
 COPY --from=builder /app/target/MythicMate-1.0-SNAPSHOT.jar /app/mythicmate.jar
 
-# Create a non-root user for security using the provided IDs
-RUN addgroup -g ${GROUP_ID} mythicmate && \
-    adduser -D -u ${USER_ID} -G mythicmate mythicmate && \
-    chown -R mythicmate:mythicmate /app && \
-    chmod -R 755 /app/database
+# Copy entrypoint script
+COPY entrypoint.sh /usr/local/bin/entrypoint.sh
+RUN chmod +x /usr/local/bin/entrypoint.sh
 
-# Switch to non-root user
-USER mythicmate
+# Create a non-root user for security
+RUN addgroup -g 1000 mythicmate && \
+    adduser -D -u 1000 -G mythicmate mythicmate && \
+    chown -R mythicmate:mythicmate /app
 
 # Expose no ports (Discord bot doesn't need to listen)
 # But if you add a health check endpoint later, expose it here
@@ -52,5 +47,5 @@ USER mythicmate
 HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
     CMD pgrep -f "java.*mythicmate.jar" || exit 1
 
-# Run the application
-CMD ["java", "-jar", "mythicmate.jar"]
+# Run as root initially so entrypoint can fix permissions, then drop to mythicmate user
+ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
