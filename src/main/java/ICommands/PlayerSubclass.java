@@ -1,12 +1,14 @@
 package ICommands;
 
-import ICommandsHelpers.QueryCommand;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+
 import Events.ICommand;
+import ICommandsHelpers.QueryCommand;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
-
-import java.util.*;
 
 public class PlayerSubclass implements ICommand {
     private final String name = "subclass";
@@ -23,9 +25,6 @@ public class PlayerSubclass implements ICommand {
         return description;
     }
 
-    private final static Set<String> classes = new HashSet<>(Arrays.asList("/artificer", "/barbarian", "/bard",
-            "/blood-hunter", "/cleric", "/druid", "/fighter", "/monk", "/paladin", "/ranger", "/rogue", "/sorcerer",
-            "/warlock", "/wizard"));
     @Override
     public List<OptionData> getOptions() {
         List<OptionData> optionData = new ArrayList<>();
