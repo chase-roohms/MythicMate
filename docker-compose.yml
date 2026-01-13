@@ -1,10 +1,5 @@
-version: '3.8'
-
 services:
   mythicmate:
-    build:
-      context: .
-      dockerfile: Dockerfile
     container_name: mythicmate-bot
     restart: unless-stopped
     
