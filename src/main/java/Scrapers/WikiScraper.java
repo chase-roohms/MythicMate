@@ -62,7 +62,7 @@ public class WikiScraper {
         }
 
 
-        Document doc = Jsoup.connect(linkURL).get();
+        Document doc = connectWithRetry(linkURL);
         Set<String> newestVersion = new HashSet<>();
 
         StopWatch timer = new StopWatch();
@@ -141,8 +141,42 @@ public class WikiScraper {
         event.getHook().sendMessageEmbeds(updateEmbed.build()).queue();
     }
 
+    private static Document connectWithRetry(String url) throws IOException {
+        int maxRetries = 3;
+        int retryDelay = 2000; // Start with 2 seconds
+        
+        for (int attempt = 1; attempt <= maxRetries; attempt++) {
+            try {
+                return Jsoup.connect(url)
+                        .userAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36")
+                        .timeout(15000) // 15 second timeout
+                        .get();
+            } catch (IOException e) {
+                if (attempt == maxRetries) {
+                    throw new IOException("Failed to fetch URL after " + maxRetries + " attempts. Status=" + 
+                            (e.getMessage().contains("Status=") ? e.getMessage() : "Unknown") + 
+                            ", URL=[" + url + "]", e);
+                }
+                
+                System.out.println("Attempt " + attempt + " failed for " + url + ": " + e.getMessage() + 
+                        ". Retrying in " + retryDelay + "ms...");
+                
+                try {
+                    Thread.sleep(retryDelay);
+                } catch (InterruptedException ie) {
+                    Thread.currentThread().interrupt();
+                    throw new IOException("Interrupted while retrying", ie);
+                }
+                
+                retryDelay *= 2; // Exponential backoff
+            }
+        }
+        
+        throw new IOException("Unexpected error in retry logic");
+    }
+
     public static void subDocScrape(String URL, String databaseType, FileWriter myWriter) throws IOException {
-        Document subDoc = Jsoup.connect(URL).get();//Save HTML
+        Document subDoc = connectWithRetry(URL);//Save HTML
         //Save name of item
         String itemName = subDoc.getElementsByClass("page-title page-header").text();
         myWriter.write(itemName + "\n");
