@@ -1,17 +1,17 @@
 package ICommands;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import Database.RulesDatabase;
 import Events.ICommand;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 
-import java.util.ArrayList;
-import java.util.List;
-
 public class Cover implements ICommand {
     private final String name = "cover";
     private final String description = "View the cover rules of DND5e.";
-    private List<OptionData> optionData = new ArrayList<>();
+    private final List<OptionData> optionData = new ArrayList<>();
 
 
     @Override
