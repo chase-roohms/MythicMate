@@ -1,21 +1,25 @@
 package Events;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Objects;
+import java.util.Scanner;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 import Bot.DiscordBot;
 import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInteractionEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.interactions.commands.Command;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
 public class AutoCompleteManager extends ListenerAdapter {
-    private final static String featOptionPath = DiscordBot.ROOTDIR + "/database/FeatList.txt";
-    private final static String spellOptionPath = DiscordBot.ROOTDIR + "/database/SpellList.txt";
-    private final static String lineageOptionPath = DiscordBot.ROOTDIR + "/database/LineageList.txt";
-    private final static String subclassOptionPath = DiscordBot.ROOTDIR + "/database/SubclassList.txt";
+    private final static String FEAT_OPTION_PATH = DiscordBot.ROOTDIR + "/database/FeatList.txt";
+    private final static String SPELL_OPTION_PATH = DiscordBot.ROOTDIR + "/database/SpellList.txt";
+    private final static String LINEAGE_OPTION_PATH = DiscordBot.ROOTDIR + "/database/LineageList.txt";
+    private final static String SUBCLASS_OPTION_PATH = DiscordBot.ROOTDIR + "/database/SubclassList.txt";
     //private final static String classOptionPath = "database/ClassList.txt";
 
     //private static String[] classOptions;
@@ -28,48 +32,48 @@ public class AutoCompleteManager extends ListenerAdapter {
     //Store each item in databse list as an option to query, and then call helper for subclasses
     public AutoCompleteManager() throws FileNotFoundException {
         //classOptions = initializeOptions(classOptionPath);
-        featOptions = initializeOptions(featOptionPath);
-        spellOptions = initializeOptions(spellOptionPath);
-        lineageOptions = initializeOptions(lineageOptionPath);
-        initializeSubclassOptions(subclassOptionPath);
+        featOptions = initializeOptions(FEAT_OPTION_PATH);
+        spellOptions = initializeOptions(SPELL_OPTION_PATH);
+        lineageOptions = initializeOptions(LINEAGE_OPTION_PATH);
+        initializeSubclassOptions(SUBCLASS_OPTION_PATH);
     }
 
     //Add options to autocomplete manager
-    public String[] initializeOptions(String path) throws FileNotFoundException {
+    private String[] initializeOptions(String path) throws FileNotFoundException {
         ArrayList<String> optionsArrayList = new ArrayList<>();
         File optionFile = new File(path);
-        Scanner optionScanner = new Scanner(optionFile);
-        while(optionScanner.hasNextLine()){
-            String nextLine = optionScanner.nextLine();
-            optionsArrayList.add(nextLine);    //Add each line (item) in database list file to the specified arrayList
+        try (Scanner optionScanner = new Scanner(optionFile)) {
+            while(optionScanner.hasNextLine()){
+                String nextLine = optionScanner.nextLine();
+                optionsArrayList.add(nextLine);    //Add each line (item) in database list file to the specified arrayList
+            }
         }
-        optionScanner.close();
         String[] optionList = new String[optionsArrayList.size()];
         optionsArrayList.toArray(optionList);
         return optionList;          //Return array list as array
     }
 
-    public void initializeSubclassOptions(String path) throws FileNotFoundException {
+    private void initializeSubclassOptions(String path) throws FileNotFoundException {
         subclassOptions = new HashMap<>();      //Key will be parent class name, item will be array of subclass strings
 
         File optionFile = new File(path);
-        Scanner optionScanner = new Scanner(optionFile);
-        while(optionScanner.hasNextLine()){
-            String nextLine = optionScanner.nextLine();
-            if(nextLine.contains(":")){ //Barbarian: Path of the zealot etc etc
-                String key = nextLine.substring(0, nextLine.indexOf(":")).trim()
-                        .toLowerCase().replace(" ", "-");
-                String optionToAdd = nextLine.substring(nextLine.indexOf(":")+1).trim();
-                if(subclassOptions.containsKey(key)){           //Existing class in hashmap
-                    subclassOptions.get(key).add(optionToAdd);
-                }
-                else{                                           //Class isn't in hashmap
-                    subclassOptions.put(key, new ArrayList<>());
-                    subclassOptions.get(key).add(optionToAdd);
+        try (Scanner optionScanner = new Scanner(optionFile)) {
+            while(optionScanner.hasNextLine()){
+                String nextLine = optionScanner.nextLine();
+                if(nextLine.contains(":")){ //Barbarian: Path of the zealot etc etc
+                    String key = nextLine.substring(0, nextLine.indexOf(":")).trim()
+                            .toLowerCase().replace(" ", "-");
+                    String optionToAdd = nextLine.substring(nextLine.indexOf(":")+1).trim();
+                    if(subclassOptions.containsKey(key)){           //Existing class in hashmap
+                        subclassOptions.get(key).add(optionToAdd);
+                    }
+                    else{                                           //Class isn't in hashmap
+                        subclassOptions.put(key, new ArrayList<>());
+                        subclassOptions.get(key).add(optionToAdd);
+                    }
                 }
             }
         }
-        optionScanner.close();
     }
 
     private void mapOptions(CommandAutoCompleteInteractionEvent event, String[] commandOptions){
