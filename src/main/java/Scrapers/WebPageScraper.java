@@ -1,11 +1,12 @@
 package Scrapers;
 
+import java.io.FileWriter;
+import java.io.IOException;
+
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.nodes.Node;
 import org.jsoup.select.Elements;
-
-import java.io.*;
 
 public class WebPageScraper {
     private enum ElementType {
@@ -17,9 +18,7 @@ public class WebPageScraper {
     }
 
     public static void scrape(String path, String docName, Document doc) {
-        try{
-            new File(path);
-            FileWriter myWriter = new FileWriter(path);
+        try (FileWriter myWriter = new FileWriter(path)) {
             myWriter.write("# " + docName + "\n");
             Element page = doc.getElementById("page-content");
             assert page != null;
@@ -52,68 +51,70 @@ public class WebPageScraper {
                         inTable = false;
                     }
 
-                    if(eType == ElementType.MAJORHEADER){
-                        underStrongBullet = false;
-                        myWriter.write("# " + line.text());
-                    }
-                    else if(eType == ElementType.MINORHEADER){
-                        underStrongBullet = false;
-                        myWriter.write("\n" + "## " + line.text());
-                    }
-                    else if(eType == ElementType.BULLET){
-                        for(Element bullet : line.select("*:not(strong)*:not(em)*:not(a)*:not(sup)*:not(sub)")
-                                .remove()){
-                            String text = bullet.toString();
-                            if(text.contains("<strong>")){
-                                underStrongBullet = true;
-                            }
-                            text = text.replace("<li><strong>", "- **")
-                                    .replace("</strong>", "**");
-
-                            if(underStrongBullet){
-                                text = text.replace("<li>", " - ");
-                            }
-                            else {
-                                text = text.replace("<li>", "- ");
-                            }
-
-                            text = text.replace("<em>", "*")
-                                    .replace("</em>", "*")
-                                    .replace("\n", "")
-                                    .replaceAll("<[^<>]*>", "");
-                            if(!text.isEmpty()){
-                                myWriter.write(text + "\n");
-                            }
+                    switch (eType) {
+                        case TABLEROW -> {
+                            // Already handled above
                         }
-                    }
-                    else if (eType == ElementType.PARAGRAPH){
-                        underStrongBullet = false;
-                        myWriter.write("\n");
-                        for(Node node : line.childNodes()){
-                            if(!node.toString().isEmpty()){
+                        case MAJORHEADER -> {
+                            underStrongBullet = false;
+                            myWriter.write("# " + line.text());
+                        }
+                        case MINORHEADER -> {
+                            underStrongBullet = false;
+                            myWriter.write("\n## " + line.text());
+                        }
+                        case BULLET -> {
+                            for (Element bullet : line.select("*:not(strong)*:not(em)*:not(a)*:not(sup)*:not(sub)")
+                                    .remove()) {
+                                String text = bullet.toString();
+                                if (text.contains("<strong>")) {
+                                    underStrongBullet = true;
+                                }
+                                text = text.replace("<li><strong>", "- **")
+                                        .replace("</strong>", "**");
 
-                                String text = node.toString();
-                                text = text.replace("<strong>", "**")
-                                        .replace("</strong>", "**")
-                                        .replace("<em>", "*")
+                                if (underStrongBullet) {
+                                    text = text.replace("<li>", " - ");
+                                } else {
+                                    text = text.replace("<li>", "- ");
+                                }
+
+                                text = text.replace("<em>", "*")
                                         .replace("</em>", "*")
-                                        .replace("<br>", "\n")
-                                        .replace("&nbsp;", " ")
-                                        .replaceAll("<[^<>]*>", "")
-                                        .replace("\r\n", "");
-                                myWriter.write(text);
+                                        .replace("\n", "")
+                                        .replaceAll("<[^<>]*>", "");
+                                if (!text.isEmpty()) {
+                                    myWriter.write(text + "\n");
+                                }
                             }
                         }
+                        case PARAGRAPH -> {
+                            underStrongBullet = false;
+                            myWriter.write("\n");
+                            for (Node node : line.childNodes()) {
+                                if (!node.toString().isEmpty()) {
 
-                        myWriter.write("\n");
+                                    String text = node.toString();
+                                    text = text.replace("<strong>", "**")
+                                            .replace("</strong>", "**")
+                                            .replace("<em>", "*")
+                                            .replace("</em>", "*")
+                                            .replace("<br>", "\n")
+                                            .replace("&nbsp;", " ")
+                                            .replaceAll("<[^<>]*>", "")
+                                            .replace("\r\n", "");
+                                    myWriter.write(text);
+                                }
+                            }
+
+                            myWriter.write("\n");
+                        }
                     }
                 }
             }
             if(inTable){
-                myWriter.write("```" + "\n");
+                myWriter.write("```\n");
             }
-            myWriter.close();
-
         } catch (IOException e) {
             System.out.println(e.getMessage());
         }
