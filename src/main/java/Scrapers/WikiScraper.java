@@ -169,8 +169,9 @@ public class WikiScraper {
                 System.out.println("Attempt " + attempt + " failed for " + url + ": " + e.getMessage() + 
                         ". Retrying in " + retryDelay + "ms...");
                 
+                // Intentional delay for retry with exponential backoff
                 try {
-                    Thread.sleep(retryDelay);
+                    TimeUnit.MILLISECONDS.sleep(retryDelay);
                 } catch (InterruptedException ie) {
                     Thread.currentThread().interrupt();
                     throw new IOException("Interrupted while retrying", ie);
