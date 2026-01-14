@@ -5,7 +5,7 @@ import net.dv8tion.jda.api.EmbedBuilder;
 public class CommandsDatabase {
     /*Full CommandPackage List                                                                         */
     /*==========================================================================================*/
-    public final static String rules = """
+    public final static String RULES = """
             - /conditions: View a list of DND 5e conditions, and their various effects.
             - /cover: Learn what constitutes as cover, and cover's various effects.
             - /damages: What damage types are there, and how often are they resisted?
@@ -15,7 +15,7 @@ public class CommandsDatabase {
             - /class (class name): Display info about a specific class.
             - /subclass (class name) (subclass name): Display info about a specific subclass.
             """;
-    public final static String rolls = """
+    public final static String ROLLS = """
             Dice input example: d6 + 4d8 + 10
             - /roll (dice): Roll some dice, and add some modifiers.
             - /rolladv (dice): Roll with advantadge.
@@ -28,8 +28,8 @@ public class CommandsDatabase {
         EmbedBuilder commandEmbed = new EmbedBuilder();
         commandEmbed.setTitle("Full Command List");
 
-        commandEmbed.addField("DND5e Rule Check", rules, false);
-        commandEmbed.addField("Roll Commands", rolls, false);
+        commandEmbed.addField("DND5e Rule Check", RULES, false);
+        commandEmbed.addField("Roll Commands", ROLLS, false);
 
         return commandEmbed;
     }
